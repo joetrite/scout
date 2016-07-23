@@ -8,17 +8,17 @@ import logging
 camera = PiCamera()
 sense = SenseHat()
 
-log_filename = "scout_log_" + datetime.now().strftime("%Y-%m-%d_%H.%M.%S.log")
-logging.basicConfig(filename='/app/scout_auto/logs/' + log_filename,level=logging.INFO)
-
 SLEEP_TIME=5
 
 while True:
 	try:
+
+		log_filename = "scout_log_" + datetime.now().strftime("%Y-%m-%d_%H.%M.%S.log")
+
 		#Image Capture	
 		pic_filename = "scout_pic_" + datetime.now().strftime("%Y-%m-%d_%H.%M.%S.jpg")
 		logging.debug("Capturing Pic " + pic_filename)
-		#camera.capture('/app/scout_auto/data/' + pic_filename)
+		camera.capture('/app/scout/data/' + pic_filename)
 	
 		#Temperature, Humitity, Pressure
 		sense.clear()
@@ -34,7 +34,11 @@ while True:
 
 		msg = "%s,%s,%s,%s" % (datetime.now().strftime("%Y%m%d%H%M%S"),t,p,h) + ",{pitch},{roll},{yaw}".format(**o)
 		#sense.show_message(msg, scroll_speed=0.10)
-		logging.info(msg)
+		#logging.info(msg)
+
+		target = open('/app/scout/logs/' + log_filename, 'w')
+		target.write(msg)
+		target.close
 
 		sleep(SLEEP_TIME)
 	except (KeyboardInterrupt, SystemExit):
