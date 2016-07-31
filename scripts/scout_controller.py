@@ -1,47 +1,33 @@
 from time import sleep
+from gpiozero import MotionSensor
 from picamera import PiCamera
-from sense_hat import SenseHat
 from datetime import datetime
 import sys
 import logging
+from openalpr import Alpr
 
+pir = MotionSensor(4)
 camera = PiCamera()
-sense = SenseHat()
 
-SLEEP_TIME=5
+SLEEP_TIME=.5
+DATA_DIR='/app/scout_plates/data/incoming/'
+
+print("Waiting for PIR to settle")
+pir.wait_for_no_motion()
 
 while True:
 	try:
+		print("Ready")
+		pir.wait_for_motion()
+		timestamp=datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
 
-		log_filename = "scout_log_" + datetime.now().strftime("%Y-%m-%d_%H.%M.%S.log")
-
+		print("motion detected at: " + timestamp)
 		#Image Capture	
-		pic_filename = "scout_pic_" + datetime.now().strftime("%Y-%m-%d_%H.%M.%S.jpg")
-		logging.debug("Capturing Pic " + pic_filename)
-		camera.capture('/app/scout/data/' + pic_filename)
-	
-		#Temperature, Humitity, Pressure
-		sense.clear()
+		pic_filename = timestamp + '.jpg'
 
-		o = sense.get_orientation_radians()
-		t = sense.get_temperature()
-		p = sense.get_pressure()
-		h = sense.get_humidity()
-
-		t = round(t, 1)
-		p = round(p, 1)
-		h = round(h, 1)
-
-		msg = "%s,%s,%s,%s" % (datetime.now().strftime("%Y%m%d%H%M%S"),t,p,h) + ",{pitch},{roll},{yaw}".format(**o)
-		#sense.show_message(msg, scroll_speed=0.10)
-		#logging.info(msg)
-
-		target = open('/app/scout/logs/' + log_filename, 'w')
-		target.write(msg)
-		target.close
+		camera.capture(DATA_DIR + pic_filename)
 
 		sleep(SLEEP_TIME)
 	except (KeyboardInterrupt, SystemExit):
 		print "Keyboard Interrupt"
-		sense.clear()
 		sys.exit(0)
