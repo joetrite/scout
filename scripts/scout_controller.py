@@ -9,7 +9,8 @@ from openalpr import Alpr
 pir = MotionSensor(4)
 camera = PiCamera()
 
-SLEEP_TIME=.5
+SLEEP_TIME=10
+
 DATA_DIR='/app/scout_plates/data/incoming/'
 
 print("Waiting for PIR to settle")
@@ -19,13 +20,16 @@ while True:
 	try:
 		print("Ready")
 		pir.wait_for_motion()
-		timestamp=datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
 
-		print("motion detected at: " + timestamp)
-		#Image Capture	
-		pic_filename = timestamp + '.jpg'
+		for x in range (0, 5):
+			sleep(0.5)
+			timestamp=datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
 
-		camera.capture(DATA_DIR + pic_filename)
+			print("motion detected at: " + timestamp)
+			#Image Capture	
+			pic_filename = timestamp + '.jpg'
+
+			camera.capture(DATA_DIR + pic_filename)
 
 		sleep(SLEEP_TIME)
 	except (KeyboardInterrupt, SystemExit):

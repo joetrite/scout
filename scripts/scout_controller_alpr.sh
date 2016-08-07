@@ -1,5 +1,7 @@
 cd /app/scout_plates/data/incoming/
 
+. /app/scout_plates/conf/device.conf
+
 while true
 do
 
@@ -14,9 +16,11 @@ do
 	then
 		ts=$(date +%s)
 		echo "plate=" $plate
-		echo $plate " - " $f > /app/scout_plates/logs/${ts}.log
+		#echo $plate " - " $f " - " ${ts} " - " ${DEVICE_ID} > /app/scout_plates/logs/${ts}.txt
+		
+		echo $plate $(date +%Y%m%d%H%M%S) $DEVICE_ID ${f}| cut -d':' -f2,3,8| cut -d' ' -f5,7,10,11,12 > /app/scout_plates/logs/${ts}.txt
 
-		scp -i /app/scout_plates/conf/scout.pem /app/scout_plates/logs/${ts}.log ec2-user@ec2-54-173-144-98.compute-1.amazonaws.com:/logs/
+		scp -i /app/scout_plates/conf/scout.pem /app/scout_plates/logs/${ts}.txt ec2-user@ec2-54-173-144-98.compute-1.amazonaws.com:/logs/
 
 		scp -i /app/scout_plates/conf/scout.pem /app/scout_plates/data/incoming/${f} ec2-user@ec2-54-173-144-98.compute-1.amazonaws.com:/data/
 
@@ -30,7 +34,6 @@ done
 
 fi
 
-sleep 5
 
 #if [ $(ls -ltr /app/scout_plates/logs/ | wc -l) -gt 1 ]
 #then
